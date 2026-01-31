@@ -23,6 +23,13 @@ const char *fragmentShaderSource = "#version 330 core\n"
     "   FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
     "}\n\0";
 
+const char *fragmentShaderSource2 = "#version 330 core\n"
+    "out vec4 FragColor;\n"
+    "void main()\n"
+    "{\n"
+    "   FragColor = vec4(0.0f, 0.5f, 0.5f, 1.0f);\n"
+    "}\n\0";
+
 int main(){
 
     glfwInit();
@@ -99,17 +106,44 @@ int main(){
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader);
 
+    // create shader program 2
+    unsigned int vertex_shader2 = glCreateShader(GL_VERTEX_SHADER);
+    unsigned int fragment_shader2 = glCreateShader(GL_FRAGMENT_SHADER);
+
+
+    glShaderSource(vertex_shader2, 1, &vertexShaderSource, NULL);
+    glShaderSource(fragment_shader2, 1, &fragmentShaderSource2, NULL);
+    glCompileShader(vertex_shader2);
+    glCompileShader(fragment_shader2);
+
+    unsigned int shaderProgram2 = glCreateProgram();
+    glAttachShader(shaderProgram2, vertex_shader2);
+    glAttachShader(shaderProgram2, fragment_shader2);
+    glLinkProgram(shaderProgram2);
+
+    glDeleteShader(vertex_shader2);
+    glDeleteShader(fragment_shader2);
+
+    // glCreateShader()
 
     // Time to create Triangle 1
-
     float vertices[] = {
-        -0.5,  0.5,  0.0,
-        -0.5, -0.5,  0.0,
-         0.5,  0.5,  0.0,
+        -0.5,  0.5,  0.0, // left top
+        -0.5, -0.5,  0.0, // left bottom
+         0.5,  0.5,  0.0, // right top
+        //  0.5, -0.5,  0.0, // right bottom
     };
 
-    unsigned int VAO, VBO;
+    unsigned int indices[] = {
+        0, 1, 2,
+        1, 2, 3,
+    };
+
+    
+
+    unsigned int VAO, VBO, EBO;
     glGenVertexArrays(1, &VAO);
+    glGenBuffers(1, &EBO);
     glGenBuffers(1, &VBO);
 
     glBindVertexArray(VAO);
@@ -118,10 +152,38 @@ int main(){
             glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
             glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), nullptr);
             glEnableVertexAttribArray(0);
-
         
         glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+
+        // glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0); // No Dont Unbind when VOA is still bind. BCZ EBO is bnid to EBO, removing it while VBO is bind will cause issues
+
     glBindVertexArray(0);
+
+    // triangle2
+    float vertices2[] = {
+         0.5,  0.5,  0.0, // right top
+         0.5, -0.5,  0.0, // right bottom
+        -0.5, -0.5,  0.0, // left bottom
+    };
+    unsigned int VBO2, VAO2;
+    glGenVertexArrays(1, &VAO2);
+    glGenBuffers(1, &VBO2);
+
+    glBindVertexArray(VAO2);
+        glBindBuffer(GL_ARRAY_BUFFER, VBO2);
+        
+        glBufferData(GL_ARRAY_BUFFER, sizeof(vertices2), vertices2, GL_STATIC_DRAW);
+
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, nullptr);
+        glEnableVertexAttribArray(0);
+
+        
+    
+    glBindVertexArray(0);
+
     
     // render loop
     // -----------
@@ -138,7 +200,13 @@ int main(){
 
         glBindVertexArray(VAO);
         glDrawArrays(GL_TRIANGLES, 0, 3);
+    
+        glUseProgram(shaderProgram2);
         
+        glBindVertexArray(VAO2);
+        glDrawArrays(GL_TRIANGLES, 0, 3);
+    
+        // glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------
