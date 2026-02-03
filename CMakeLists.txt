@@ -13,6 +13,7 @@ set(Glfw_dir "${CMAKE_SOURCE_DIR}/external/glfw")
 # ==========================================
 add_executable(learnOpengl
                 src/main.cpp
+                src/Shader.cpp
                 )
 
 
