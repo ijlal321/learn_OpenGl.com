@@ -33,4 +33,6 @@ target_sources(learnOpengl PRIVATE ${Glad_Dir}/src/glad.c)
 target_include_directories(learnOpengl PRIVATE ${Glfw_dir}/include)
 target_link_libraries(learnOpengl PRIVATE ${Glfw_dir}/lib-vc2022/glfw3.lib)
 
-
+## Adding Glad Files for GLM Library
+# ==========================================
+target_include_directories(learnOpengl PRIVATE ${CMAKE_SOURCE_DIR}/external/glm)
