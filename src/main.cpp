@@ -3,8 +3,14 @@
 // include GLAD before GLFW. The include file for GLAD includes the required OpenGL headers behind the scenes (like GL/gl.h)
 // so be sure to include GLAD before other header files that require OpenGL (like GLFW).
 #include <GLFW/glfw3.h>
+
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
 #include "stb_image.h"
 #include "Shader.h"
+
 
 
 void processInput(GLFWwindow *window);
@@ -151,6 +157,15 @@ int main(){
     glUniform1i(glGetUniformLocation(ourShader.ID, "texture1"), 0);
     glUniform1i(glGetUniformLocation(ourShader.ID, "texture2"), 1);
 
+    // create translation, rotation, scaling for matrix
+    glm::mat4 trans = glm::mat4(1.0f);
+    trans = glm::translate(trans, glm::vec3(0.3, 0.3, 0));
+    trans = glm::rotate(trans, glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+    trans = glm::scale(trans, glm::vec3(1.5f, 0.5f, 1.0f));
+    
+    glUniformMatrix4fv(glGetUniformLocation(ourShader.ID, "trans"), 1, GL_FALSE, glm::value_ptr(trans));
+    
+
     // render loop
     // -----------
     while (!glfwWindowShouldClose(window)){
@@ -166,7 +181,8 @@ int main(){
 
         glBindVertexArray(VAO);
         // glDrawArrays(GL_TRIANGLES, 0, 6);
-    
+        glUniformMatrix4fv(glGetUniformLocation(ourShader.ID, "trans"), 1, GL_FALSE, glm::value_ptr(trans));
+
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
