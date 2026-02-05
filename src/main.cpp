@@ -194,11 +194,10 @@ int main(){
     // model = glm::scale(model, glm::vec3(1.5f, 0.5f, 1.0f));
     
     glm::vec3 camera = glm::vec3(2.0, 0.0, 3.0);
-    const float radius = 10.0f;
-    float camX = sin(glfwGetTime()) * radius;
-    float camZ = cos(glfwGetTime()) * radius;
-    glm::mat4 view;
-    view = glm::lookAt(glm::vec3(camX, 0.0, camZ), glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0));
+    glm::vec3 cameraPos   = glm::vec3(0.0f, 0.0f,  3.0f);
+    glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
+    glm::vec3 cameraUp    = glm::vec3(0.0f, 1.0f,  0.0f);
+    glm::mat4 view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
 
     glm::mat4 projection = glm::perspective(glm::radians(45.0f), SCR_WIDTH/(float)SCR_HEIGHT, 0.1f, 100.0f);
 
@@ -220,27 +219,60 @@ int main(){
         glm::vec3(-1.3f,  1.0f, -1.5f)  
     };
 
+    float deltaTime = 0.0f;	// Time between current frame and last frame
+    float lastFrame = 0.0f; // Time of last frame
+
+    float yaw   = -90.0f;	// yaw is initialized to -90.0 degrees since a yaw of 0.0 results in a direction vector pointing to the right so we initially rotate a bit to the left.
+    float pitch =  0.0f;
+
     glEnable(GL_DEPTH_TEST);
     // render loop
     // -----------
     while (!glfwWindowShouldClose(window)){
+        float currentFrame = glfwGetTime();
+        deltaTime = currentFrame - lastFrame;
+        lastFrame = currentFrame;
 
         // Input
         processInput(window);
 
-        // rendering commands here
-        glClearColor(0.2f, 0.3f, 0.3f, 1.0f); // (set state) set clear clolor buffer
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // (do something based on state) clear colors using clear color buffer
-        
-        ourShader.use();
-        glBindVertexArray(VAO);
+        const float cameraSpeed = 2.5f * deltaTime; // adjust accordingly
+        const float cameraRotationSpeed = 30.0f * deltaTime; // adjust accordingly
+            // camera tranaslation
+        if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+            cameraPos += cameraSpeed * cameraFront;
+        if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+            cameraPos -= cameraSpeed * cameraFront;
+        if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+            cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+        if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+            cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+            // camera rotation
+        if (glfwGetKey(window, GLFW_KEY_I) == GLFW_PRESS)
+            pitch += cameraRotationSpeed;
+        if (glfwGetKey(window, GLFW_KEY_K) == GLFW_PRESS)
+            pitch -= cameraRotationSpeed;
+        if (glfwGetKey(window, GLFW_KEY_J) == GLFW_PRESS)
+            yaw -= cameraRotationSpeed;
+        if (glfwGetKey(window, GLFW_KEY_L) == GLFW_PRESS)
+            yaw += cameraRotationSpeed;
 
-        const float radius = 10.0f;
-        float camX = sin(glfwGetTime()) * radius;
-        float camZ = cos(glfwGetTime()) * radius;
-        glm::mat4 view;
-        view = glm::lookAt(glm::vec3(camX, 0.0, camZ), glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0));
-        glUniformMatrix4fv(glGetUniformLocation(ourShader.ID, "view"), 1, GL_FALSE, glm::value_ptr(view));
+            
+            
+            // rendering commands here
+            glClearColor(0.2f, 0.3f, 0.3f, 1.0f); // (set state) set clear clolor buffer
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // (do something based on state) clear colors using clear color buffer
+            
+            ourShader.use();
+            glBindVertexArray(VAO);
+                    
+            glm::vec3 front;
+            front.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+            front.y = sin(glm::radians(pitch));
+            front.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+            cameraFront = glm::normalize(front);
+            glm::mat4 view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
+            glUniformMatrix4fv(glGetUniformLocation(ourShader.ID, "view"), 1, GL_FALSE, glm::value_ptr(view));
 
 
         for (unsigned int i = 0; i < 10; i++){
