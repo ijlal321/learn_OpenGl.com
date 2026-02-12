@@ -55,11 +55,12 @@ struct PicSpotLight{
     vec3 ambient;
     sampler2D diffuse;
     vec3 specular;
-}
+};
 
 #define NR_POINT_LIGHTS 4
 
 in vec3 FragPos;
+in vec3 FragViewPos;
 in vec3 Normal;
 in vec2 TexCoords;
 
@@ -165,10 +166,29 @@ vec3 CalcSpotLight(SpotLight light, vec3 normal, vec3 fragPos, vec3 viewDir)
     return (ambient + diffuse + specular);
 }
 
-vec3 CalcPicSpotLight(PicSpotLight light, vec3 normal, vec3 fragPos, vec3 viewDir);
+vec3 CalcPicSpotLight(PicSpotLight light, vec3 normal, vec3 fragPos, vec3 viewDir)
 {
+    // diffuse
+    vec3 lightDir = normalize(light.position - fragPos);
+    float diff = max(dot(lightDir, normal), 0.0f);
 
+    vec3 nFragPos = normalize(FragViewPos);
+    float angleX = nFragPos.x;
+    float angleY = nFragPos.y;
+    angleX = angleX / sin(radians(15));
+    angleY = angleY / sin(radians(15));
+    angleX = (angleX + 1) * 0.5;
+    angleY = (angleY + 1) * -0.5;
+    vec3 picDiffuse = vec3(texture(light.diffuse, vec2(angleX, angleY)));
 
+    // spotlight intensity
+    float theta = dot(lightDir, normalize(-light.direction)); 
+    float epsilon = light.cutOff - light.outerCutOff;
+    float intensity = clamp((theta - light.outerCutOff) / epsilon, 0.0, 1.0);
+
+    vec3 diffuse =  picDiffuse * diff * intensity;
+
+    return diffuse;
     // vec3 lightDir = normalize(light.position - fragPos);
     // // diffuse shading
     // float diff = max(dot(normal, lightDir), 0.0);
@@ -183,7 +203,7 @@ vec3 CalcPicSpotLight(PicSpotLight light, vec3 normal, vec3 fragPos, vec3 viewDi
     // float epsilon = light.cutOff - light.outerCutOff;
     // float intensity = clamp((theta - light.outerCutOff) / epsilon, 0.0, 1.0);
     // // combine results
-    // vec3 ambient = light.ambient * vec3(texture(material.diffuse, TexCoords));
+    // vec3 ambient = light.ambient * vec3(vec3(texture(material.diffuse, TexCoords)));
     // vec3 diffuse = light.diffuse * diff * vec3(texture(material.diffuse, TexCoords));
     // vec3 specular = light.specular * spec * vec3(texture(material.specular, TexCoords));
     // ambient *= attenuation * intensity;
