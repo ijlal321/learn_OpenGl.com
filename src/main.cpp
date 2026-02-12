@@ -179,12 +179,14 @@ int main()
     // -----------------------------------------------------------------------------
     unsigned int diffuseMap = loadTexture("../../resources/container2.png");
     unsigned int specularMap = loadTexture("../../resources/container2_specular.png");
+    unsigned int spotLightTexture = loadTexture("../../resources/stary_sky.jpg");
 
     // shader configuration
     // --------------------
     lightingShader.use();
     lightingShader.setInt("material.diffuse", 0);
     lightingShader.setInt("material.specular", 1);
+    lightingShader.setInt("picSpotLight.diffuse", 2);
 
 
     // render loop
@@ -284,6 +286,9 @@ int main()
         // bind specular map
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, specularMap);
+        // bind spotlight map
+        glActiveTexture(GL_TEXTURE2);
+        glBindTexture(GL_TEXTURE_2D, spotLightTexture);
 
         // render containers
         glBindVertexArray(cubeVAO);
