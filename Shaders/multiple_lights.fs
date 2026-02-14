@@ -77,6 +77,15 @@ vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir);
 vec3 CalcSpotLight(SpotLight light, vec3 normal, vec3 fragPos, vec3 viewDir);
 vec3 CalcPicSpotLight(PicSpotLight light, vec3 normal, vec3 fragPos, vec3 viewDir);
 
+float near = 0.1; 
+float far  = 10.0; 
+  
+float LinearizeDepth(float depth) 
+{
+    float z = depth * 2.0 - 1.0; // back to NDC 
+    return (2.0 * near * far) / (far + near - z * (far - near));	
+}
+
 void main()
 {    
     // properties
@@ -100,6 +109,23 @@ void main()
     result = CalcPicSpotLight(picSpotLight, norm, FragPos, viewDir);
 
     FragColor = vec4(result, 1.0);
+
+    // float depth = LinearizeDepth(gl_FragCoord.z) / far;
+    // float fog = exp(-depth * 7.0);  // tweak factor to control falloff
+    // FragColor = vec4(vec3(fog), 1.0);
+
+    // distance along camera forward
+    float distance = -FragViewPos.z;  
+
+    // linear fog factor (0 = far, 1 = near)
+    float fogLinear = 1.0 - clamp(distance / far, 0.0, 1.0);
+
+    // optional: exponential fog for cinematic feel
+    float fogExp = exp(-distance * 0.2);  
+
+    // choose one
+    FragColor = vec4(vec3(fogExp), 1.0);
+
 }
 
 // calculates the color when using a directional light.
@@ -169,22 +195,27 @@ vec3 CalcSpotLight(SpotLight light, vec3 normal, vec3 fragPos, vec3 viewDir)
 vec3 CalcPicSpotLight(PicSpotLight light, vec3 normal, vec3 fragPos, vec3 viewDir)
 {
     // diffuse
-    vec3 lightDir = normalize(light.position - fragPos);
+    vec3 lightDir = normalize(light.position - fragPos); // both in model space
     float diff = max(dot(lightDir, normal), 0.0f);
 
     vec3 nFragPos = normalize(FragViewPos);
-    float angleX = nFragPos.x;
-    float angleY = nFragPos.y;
-    angleX = angleX / sin(radians(15));
-    angleY = angleY / sin(radians(15));
+    float angleX = acos(nFragPos.x); // x and y must be [-1,1], and result is in radians
+    float angleY = acos(nFragPos.y);
+    float angleZ = acos(nFragPos.z);
+    angleX = angleX / radians(15);
+    angleY = angleY / radians(15);
     angleX = (angleX + 1) * 0.5;
-    angleY = (angleY + 1) * -0.5;
+    angleY = (angleY + 1) * 0.5;
     vec3 picDiffuse = vec3(texture(light.diffuse, vec2(angleX, angleY)));
 
     // spotlight intensity
     float theta = dot(lightDir, normalize(-light.direction)); 
-    float epsilon = light.cutOff - light.outerCutOff;
+    float epsilon = light.cutOff - light.outerCutOff ;
     float intensity = clamp((theta - light.outerCutOff) / epsilon, 0.0, 1.0);
+
+    // // attenuation
+    float distance = length(light.position - fragPos);
+    float attenuation = 1.0 / (light.constant + light.linear * distance + light.quadratic * (distance * distance));  
 
     vec3 diffuse =  picDiffuse * diff * intensity;
 
