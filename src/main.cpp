@@ -77,78 +77,62 @@ int main()
     // configure global opengl state
     // -----------------------------
     glEnable(GL_DEPTH_TEST);
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
+    glFrontFace(GL_CCW);  
 
     // build and compile shaders
     // -------------------------
-    Shader shader("../../Shaders/3.1.blending.vs", "../../Shaders/3.1.blending.fs");
+    Shader shader("../../Shaders/5.1.culling.vs", "../../Shaders/5.1.culling.fs");
 
     // set up vertex data (and buffer(s)) and configure vertex attributes
     // ------------------------------------------------------------------
     
     float cubeVertices[] = {
-        // positions          // texture Coords
-        -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
-         0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
-         0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-         0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-        -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-        -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
-
-        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-         0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-         0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-         0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-        -0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
-        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-
-        -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-        -0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-        -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-
-         0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-         0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-         0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-         0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-         0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-         0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-
-        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-         0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
-         0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-         0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-
-        -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-         0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-         0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-         0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-        -0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
-        -0.5f,  0.5f, -0.5f,  0.0f, 1.0f
+        // Back face
+        -0.5f, -0.5f, -0.5f,  0.0f, 0.0f, // Bottom-left
+        0.5f,  0.5f, -0.5f,  1.0f, 1.0f, // top-right
+        0.5f, -0.5f, -0.5f,  1.0f, 0.0f, // bottom-right         
+        0.5f,  0.5f, -0.5f,  1.0f, 1.0f, // top-right
+        -0.5f, -0.5f, -0.5f,  0.0f, 0.0f, // bottom-left
+        -0.5f,  0.5f, -0.5f,  0.0f, 1.0f, // top-left
+        // Front face
+        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f, // bottom-left
+        0.5f, -0.5f,  0.5f,  1.0f, 0.0f, // bottom-right
+        0.5f,  0.5f,  0.5f,  1.0f, 1.0f, // top-right
+        0.5f,  0.5f,  0.5f,  1.0f, 1.0f, // top-right
+        -0.5f,  0.5f,  0.5f,  0.0f, 1.0f, // top-left
+        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f, // bottom-left
+        // Left face
+        -0.5f,  0.5f,  0.5f,  1.0f, 0.0f, // top-right
+        -0.5f,  0.5f, -0.5f,  1.0f, 1.0f, // top-left
+        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f, // bottom-left
+        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f, // bottom-left
+        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f, // bottom-right
+        -0.5f,  0.5f,  0.5f,  1.0f, 0.0f, // top-right
+        // Right face
+        0.5f,  0.5f,  0.5f,  1.0f, 0.0f, // top-left
+        0.5f, -0.5f, -0.5f,  0.0f, 1.0f, // bottom-right
+        0.5f,  0.5f, -0.5f,  1.0f, 1.0f, // top-right         
+        0.5f, -0.5f, -0.5f,  0.0f, 1.0f, // bottom-right
+        0.5f,  0.5f,  0.5f,  1.0f, 0.0f, // top-left
+        0.5f, -0.5f,  0.5f,  0.0f, 0.0f, // bottom-left     
+        // Bottom face
+        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f, // top-right
+        0.5f, -0.5f, -0.5f,  1.0f, 1.0f, // top-left
+        0.5f, -0.5f,  0.5f,  1.0f, 0.0f, // bottom-left
+        0.5f, -0.5f,  0.5f,  1.0f, 0.0f, // bottom-left
+        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f, // bottom-right
+        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f, // top-right
+        // Top face
+        -0.5f,  0.5f, -0.5f,  0.0f, 1.0f, // top-left
+        0.5f,  0.5f,  0.5f,  1.0f, 0.0f, // bottom-right
+        0.5f,  0.5f, -0.5f,  1.0f, 1.0f, // top-right     
+        0.5f,  0.5f,  0.5f,  1.0f, 0.0f, // bottom-right
+        -0.5f,  0.5f, -0.5f,  0.0f, 1.0f, // top-left
+        -0.5f,  0.5f,  0.5f,  0.0f, 0.0f  // bottom-left        
     };
-    float planeVertices[] = {
-        // positions          // texture Coords (note we set these higher than 1 (together with GL_REPEAT as texture wrapping mode). this will cause the floor texture to repeat)
-         5.0f, -0.5f,  5.0f,  2.0f, 0.0f,
-        -5.0f, -0.5f,  5.0f,  0.0f, 0.0f,
-        -5.0f, -0.5f, -5.0f,  0.0f, 2.0f,
 
-         5.0f, -0.5f,  5.0f,  2.0f, 0.0f,
-        -5.0f, -0.5f, -5.0f,  0.0f, 2.0f,
-         5.0f, -0.5f, -5.0f,  2.0f, 2.0f
-    };
-    float transparentVertices[] = {
-        // positions         // texture Coords (swapped y coordinates because texture is flipped upside down)
-        0.0f,  0.5f,  0.0f,  0.0f,  0.0f,
-        0.0f, -0.5f,  0.0f,  0.0f,  1.0f,
-        1.0f, -0.5f,  0.0f,  1.0f,  1.0f,
-
-        0.0f,  0.5f,  0.0f,  0.0f,  0.0f,
-        1.0f, -0.5f,  0.0f,  1.0f,  1.0f,
-        1.0f,  0.5f,  0.0f,  1.0f,  0.0f
-    };
     
     // cube VAO
     unsigned int cubeVAO, cubeVBO;
@@ -162,47 +146,10 @@ int main()
     glEnableVertexAttribArray(1);
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
     glBindVertexArray(0);
-    // plane VAO
-    unsigned int planeVAO, planeVBO;
-    glGenVertexArrays(1, &planeVAO);
-    glGenBuffers(1, &planeVBO);
-    glBindVertexArray(planeVAO);
-    glBindBuffer(GL_ARRAY_BUFFER, planeVBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(planeVertices), &planeVertices, GL_STATIC_DRAW);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
-    glBindVertexArray(0);
-    // transparent VAO
-    unsigned int transparentVAO, transparentVBO;
-    glGenVertexArrays(1, &transparentVAO);
-    glGenBuffers(1, &transparentVBO);
-    glBindVertexArray(transparentVAO);
-    glBindBuffer(GL_ARRAY_BUFFER, transparentVBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(transparentVertices), transparentVertices, GL_STATIC_DRAW);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
-    glBindVertexArray(0);
     
     // load textures
     // -------------
     unsigned int cubeTexture = loadTexture("../../Resources/wall.jpg");
-    unsigned int floorTexture = loadTexture("../../Resources/wall.jpg");
-    unsigned int transparentTexture = loadTexture("../../Resources/grass.png");
-
-    // transparent vegetation locations
-    // --------------------------------
-    vector<glm::vec3> vegetation
-    {
-        glm::vec3(-1.5f, 0.0f, -0.48f),
-        glm::vec3( 1.5f, 0.0f, 0.51f),
-        glm::vec3( 0.0f, 0.0f, 0.7f),
-        glm::vec3(-0.3f, 0.0f, -2.3f),
-        glm::vec3 (0.5f, 0.0f, -0.6f)
-    };
 
     // shader configuration
     // --------------------
@@ -246,24 +193,7 @@ int main()
         model = glm::translate(model, glm::vec3(2.0f, 0.0f, 0.0f));
         shader.setMat4("model", model);
         glDrawArrays(GL_TRIANGLES, 0, 36);
-        // floor
-        glBindVertexArray(planeVAO);
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, floorTexture);
-        model = glm::mat4(1.0f);
-        shader.setMat4("model", model);
-        glDrawArrays(GL_TRIANGLES, 0, 6);
-        // vegetation
-        glBindVertexArray(transparentVAO);
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, transparentTexture);
-        for (int i = 0; i < vegetation.size(); i++)
-        {
-            model = glm::mat4(1.0f);
-            model = glm::translate(model, vegetation[i]);
-            shader.setMat4("model", model);
-            glDrawArrays(GL_TRIANGLES, 0, 6);
-        }
+        
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------
@@ -274,9 +204,7 @@ int main()
     // optional: de-allocate all resources once they've outlived their purpose:
     // ------------------------------------------------------------------------
     glDeleteVertexArrays(1, &cubeVAO);
-    glDeleteVertexArrays(1, &planeVAO);
     glDeleteBuffers(1, &cubeVBO);
-    glDeleteBuffers(1, &planeVBO);
 
     // glfw: terminate, clearing all previously allocated GLFW resources.
     // ------------------------------------------------------------------
