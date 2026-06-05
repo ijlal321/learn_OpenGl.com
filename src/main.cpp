@@ -13,6 +13,7 @@
 #include <iostream>
 using std::vector;
 
+// ==== Function Prototypes ====
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
@@ -81,8 +82,8 @@ int main()
 
     // build and compile shaders
     // -------------------------
-    Shader shader("../../Shaders/6.2.cubemaps.vs", "../../Shaders/6.2.cubemaps.fs");
-    Shader skyboxShader("../../Shaders/5.1.skybox.vs", "../../Shaders/5.1.skybox.fs");
+    Shader shader("../../Shaders/6.2.cubemaps.vs", "../../Shaders/6.2.cubemaps.fs", "123");
+    Shader skyboxShader("../../Shaders/5.1.skybox.vs", "../../Shaders/5.1.skybox.fs", "123");
 
     // set up vertex data (and buffer(s)) and configure vertex attributes
     // ------------------------------------------------------------------
