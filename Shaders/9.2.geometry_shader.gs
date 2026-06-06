@@ -1,12 +1,38 @@
 #version 330 core
 layout (triangles) in;
-layout (triangle_strip, max_vertices = 3) out;
+layout (line_strip, max_vertices = 6) out;
 
-void main() {    
-    for(int i=0; i<3; i++)
-    {
-        gl_Position = gl_in[i].gl_Position; 
-        EmitVertex();
-    }
+
+in VS_OUT {
+    vec3 normal;
+} gs_in[];
+
+const float MAGNITUDE = 0.2;
+
+uniform mat4 projection;
+
+void GenerateLine(int index)
+{
+    gl_Position = projection * gl_in[index].gl_Position;
+    EmitVertex();
+    gl_Position = projection * (gl_in[index].gl_Position + vec4(gs_in[index].normal, 0.0) * MAGNITUDE);
+    EmitVertex();
     EndPrimitive();
+}
+
+
+
+void main() {   
+
+    // for(int i=0; i<3; i++)
+    // {
+    //     texCoords = vsTexCoords[i];
+    //     gl_Position = gl_in[i].gl_Position; 
+    //     EmitVertex();
+    // }
+    // EndPrimitive();
+
+    GenerateLine(0); // first vertex normal
+    GenerateLine(1); // second vertex normal
+    GenerateLine(2); // third vertex normal
 }  

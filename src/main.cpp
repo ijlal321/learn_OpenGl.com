@@ -131,13 +131,6 @@ int main()
         -0.5f,  0.5f,  0.5f,
         -0.5f,  0.5f, -0.5f,
     };
-    float triangleVertices[] = 
-    {
-        // position
-        -0.5f, -0.5f, 0.0f, // left bottom
-         0.5f, -0.5f, 0.0f, // right bottom
-        -0.5f,  0.5f, 0.0f, // left top
-    };
 
     // cube VAO
     unsigned int cubeVAO, cubeVBO;
@@ -147,18 +140,7 @@ int main()
     glBindBuffer(GL_ARRAY_BUFFER, cubeVBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(cubeVertices), &cubeVertices, GL_STATIC_DRAW);
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
-    // triangle VAO
-    unsigned int triangleVAO, triangleVBO;
-    glGenVertexArrays(1, &triangleVAO);
-    glGenBuffers(1, &triangleVBO);
-    glBindVertexArray(triangleVAO);
-    glBindBuffer(GL_ARRAY_BUFFER, triangleVBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(triangleVertices), &triangleVertices, GL_STATIC_DRAW);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float)*3, (void*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 
     // load textures
     // -------------
@@ -173,7 +155,7 @@ int main()
         "../../Resources/skybox/front.jpg",
         "../../Resources/skybox/back.jpg"
     };
-    // unsigned int cubemapTexture = loadCubemap(faces); 
+    unsigned int cubemapTexture = loadCubemap(faces); 
 
     // shader configuration
     // --------------------
@@ -201,6 +183,10 @@ int main()
         // -----
         processInput(window);
 
+        // Update Uniforms
+        // ----
+        shader.setFloat("time", glfwGetTime());
+
         // render
         // ------
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
@@ -209,6 +195,7 @@ int main()
         // draw scene as normal
         shader.use();
         glm::mat4 model = glm::mat4(1.0f);
+        model = glm::translate(model, glm::vec3(-0.2, -0.3, 0));
         glm::mat4 view = camera.GetViewMatrix();
         glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
         shader.setMat4("model", model);
@@ -216,7 +203,7 @@ int main()
         shader.setMat4("projection", projection);
         // shader.setVec3("cameraPos", camera.Position);
         // cubes
-        glBindVertexArray(triangleVAO);
+        glBindVertexArray(cubeVAO);
         // glActiveTexture(GL_TEXTURE0);
         // glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
         glDrawArrays(GL_TRIANGLES, 0, 36);
